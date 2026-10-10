@@ -119,9 +119,9 @@ Xoá trong lượt LiDAR nếu một điều kiện đúng: Pxx > 9 hoặc Pyy >
 
 ## Khai báo sử dụng AI (bắt buộc)
 
-- Công cụ đã dùng (ChatGPT, Copilot, Claude, …): OpenAI Codex trong ChatGPT.
-- Dùng cho phần nào (hàm, câu hỏi, debug): Đọc yêu cầu; triển khai tất cả hàm Part E–H; cài môi trường và kiểm tra; chuẩn bị phần giải thích báo cáo, tìm dữ liệu/weights.
-- Cách bạn đã kiểm tra lại (pytest, chạy Waymo, đối chiếu công thức): Codex chạy test gốc trước triển khai (82 passed, 46 xfailed), đối chiếu công thức với stub/hướng dẫn kỹ thuật, chạy test từng checkpoint rồi toàn bộ 128 test sau CP4. Đã chạy Waymo compare seed 0 đủ frames 0–198; kiểm tra lại cả 3 cặp metrics/log và đối chiếu ngưỡng rubric. Học viên cần tự đọc, kiểm tra và giải thích được code/báo cáo khi vấn đáp.
+- Công cụ đã dùng (ChatGPT, Copilot, Claude, …): Codex (ChatGPT).
+- Dùng cho phần nào (hàm, câu hỏi, debug): Hỗ trợ triển khai Part E–H, thiết lập môi trường, debug và soạn báo cáo. Học viên tự chuẩn bị và giải nén dữ liệu Waymo.
+- Cách bạn đã kiểm tra lại (pytest, chạy Waymo, đối chiếu công thức): Đối chiếu công thức trong hướng dẫn; 128 test pass; chạy Waymo compare seed 0, frames 0–198 và kiểm tra metrics khớp log.
 
 ## Checklist nộp
 
