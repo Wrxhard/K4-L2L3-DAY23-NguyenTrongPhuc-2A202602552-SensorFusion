@@ -4,7 +4,7 @@
 
 - Họ tên: Nguyễn Trọng Phúc
 - MSSV: 2A202602552
-- Email: phucmxst123@gmail.com (theo cấu hình git; cần học viên xác nhận)
+- Email: phucmxst123@gmail.com (theo cấu hình git)
 - Link repo (fork): https://github.com/Wrxhard/K4-L2L3-DAY23-NguyenTrongPhuc-2A202602552-SensorFusion
 - Commit code E–H đã kiểm tra: `850c2d8` (CP4).
 - Commit hash nộp (`git rev-parse HEAD`): Chưa có bản nộp cuối; CP5 còn thiếu dữ liệu Waymo.
@@ -77,7 +77,7 @@ Euclid không phản ánh độ bất định state và noise từng sensor. `d�
 
 Đây là **track-then-fuse**: một danh sách track, predict một lần/frame, gán/update LiDAR và quản lý vòng đời, rồi gán/update camera lên cùng track. Camera không tạo tracker riêng hoặc gộp raw image với point cloud trước detector. Detector cho hộp từng frame; tracker duy trì ID, vị trí, vận tốc và covariance qua thời gian.
 
-Dẫn chứng: `run_single` trong [run_lab.py](../platform/fusion_lab/scripts/run_lab.py) gọi vòng `KF.predict(track)`, sau đó `associate_and_update(..., lidar_sensor)`, rồi `associate_and_update(..., camera_sensor)`; không predict giữa hai update. `grade_run.log` chỉ ghi kết quả tổng hợp từng mode/frame, không ghi thứ tự update nội bộ. Chưa chạy Waymo nên chưa có record log thực tế để viện dẫn; thứ tự trên được xác minh từ code và test.
+Dẫn chứng: `run` trong [run_lab.py](../platform/fusion_lab/scripts/run_lab.py) gọi vòng `KF.predict(track)`, sau đó `associate_and_update(..., lidar_sensor)`, rồi `associate_and_update(..., camera_sensor)`; không predict giữa hai update. `grade_run.log` chỉ ghi kết quả tổng hợp từng mode/frame, không ghi thứ tự update nội bộ; thứ tự được xác minh từ code và test.
 
 ### 4. Nếu camera lệch calibration, triệu chứng gì trên innovation/residual?
 
