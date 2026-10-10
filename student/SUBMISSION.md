@@ -7,19 +7,19 @@
 - Email: phucmxst123@gmail.com (theo cấu hình git)
 - Link repo (fork): https://github.com/Wrxhard/K4-L2L3-DAY23-NguyenTrongPhuc-2A202602552-SensorFusion
 - Commit code E–H đã kiểm tra: `850c2d8` (CP4).
-- Commit hash nộp (`git rev-parse HEAD`): Chưa có bản nộp cuối; CP5 còn thiếu dữ liệu Waymo.
+- Commit hash nộp (`git rev-parse HEAD`): Bản nộp cuối là HEAD sau CP6; lấy hash 40 ký tự bằng lệnh trên. Hash cuối được cung cấp cùng link repo khi bàn giao.
 
 ## Trạng thái checkpoint
 
 | Checkpoint | Kết quả thực tế | Commit |
 |---|---|---|
-| CP0 | Môi trường và CLI hoạt động, cấu hình local frame 0–198; còn thiếu segment Waymo | `12100e6` |
+| CP0 | Môi trường và CLI hoạt động; data/ đã đủ Waymo và weights, cấu hình frame 0–198 | `12100e6` |
 | CP1 — EKF | 4 test Part E pass | `b9e71c2` |
 | CP2 — Camera | 20 test theo bộ lọc CP2 pass | `6abb1b1` |
 | CP3 — Association | 9 test theo bộ lọc CP3 pass | `cea751b` |
 | CP4 — Lifecycle | Toàn bộ 128 test pass; không còn failed/xfailed | `850c2d8` |
-| CP5 — Waymo | Chưa hoàn tất: thiếu segment mặc định; Drive của lớp báo vượt hạn mức tải | Chưa có |
-| CP6 — Báo cáo và nộp | Đã chuẩn bị giải thích và khai báo AI; chưa đủ artifacts để nộp | Chưa hoàn tất |
+| CP5 — Waymo | Compare seed 0, đủ 199 frame/mode; 6 artifacts đã kiểm tra và commit | `b6be483` |
+| CP6 — Báo cáo | Số liệu thực tế, 6 câu giải thích, khai báo AI và kiểm tra nộp bài | Commit cuối có tiền tố `CP6:` |
 
 Lệnh kiểm tra từ gốc repo trên Windows:
 
@@ -32,17 +32,35 @@ Kết quả sau CP4: `128 passed, 830 warnings in 10.74s`. Warnings chủ yếu 
 
 ## Tóm tắt kết quả
 
-**Chưa có số liệu Waymo; báo cáo chưa sẵn sàng nộp.** Không tạo hoặc sửa tay artifacts. Chỉ so sánh hai mode khi đã chạy thật.
+Nguồn: [metrics.json](artifacts/metrics.json) và [grade_run.log](artifacts/grade_run.log), do pipeline sinh ra; không sửa tay artifacts.
 
-Weights FPN đã tải từ [SFA3D chính thức](https://github.com/maudzung/SFA3D/tree/master/checkpoints/fpn_resnet_18) được `data/README.md` dẫn; `create_fpn_model` đã nạp thành công. Lệnh compare đã thử nhưng dừng với `FileNotFoundError` vì thiếu segment mặc định trong `data/Waymo/`. ZIP `Day23-Fusion-...-003.zip` có sẵn chỉ chứa weights Darknet, không có Waymo. Các file dữ liệu/weights/ZIP vẫn nằm local, không đưa vào commit.
+- `fusion_mode`: `compare`.
+- `frames`: `[0, 198]` (199 frame mỗi mode, tính cả hai đầu).
+- `segment`: `training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord`.
+- `seed`: `0`.
+- `detection.precision`: `0.9700934579439252`; `detection.recall`: `0.7004048582995951`.
+- `detection.tp/fp/fn`: `519/16/222`; detection giống nhau giữa hai mode ở mọi frame.
 
-- `fusion_mode`, `frames`, `segment`, `seed`: Cấu hình dự kiến `compare`, `[0, 198]`, `training_segment-1005081002024129653_5313_150_5333_150_with_camera_labels.tfrecord`, `0`; chưa phải kết quả chạy.
-- `detection.precision`, `detection.recall`, `detection.tp/fp/fn`: Chưa đo.
-- `tracking.lidar.rmse`, `matches`, `sum_sq_err`, `ghost_track_frames`, `missed_gt_frames`, `mean_confirmed_tracks`: Chưa đo.
-- `tracking.fused.rmse`, `matches`, `sum_sq_err`, `ghost_track_frames`, `missed_gt_frames`, `mean_confirmed_tracks`: Chưa đo.
-- Giải thích khác biệt hai mode: Chưa đủ bằng chứng để kết luận camera cải thiện hay làm xấu tracking.
+| Tracking metric | LiDAR | Fused |
+|---|---:|---:|
+| RMSE (m) | 0.15032268781360134 | 0.17109183025633565 |
+| matches | 502 | 502 |
+| sum_sq_err (m²) | 11.343649056695735 | 14.694752018992311 |
+| ghost_track_frames | 0 | 0 |
+| missed_gt_frames | 239 | 239 |
+| mean_confirmed_tracks | 2.522613065326633 | 2.522613065326633 |
+| precision_track | 1.0 | 1.0 |
+| coverage = matches / det_tp | 0.9672447013487476 | 0.9672447013487476 |
 
-Khi có dữ liệu, chạy từ gốc repo:
+Trong lần chạy này, camera làm RMSE tăng `0.020769142442734312 m`, khoảng 2,08 cm, trong khi matches, ghost, miss và mean confirmed không đổi. Fused không cải thiện sai số vị trí, nhưng vẫn đạt RMSE ≤ 0.45 m và chênh lệch ≤ 0.05 m. Hai mode đều có precision_track = 1 và coverage ≈ 96,72%, vượt ngưỡng 0.75 và 0.70. Vì số cặp ghép giống nhau, khác biệt RMSE không đến từ việc đánh giá ít cặp hơn; sum_sq_err tăng từ 11.343649056695735 lên 14.694752018992311 m².
+
+Ví dụ frame 46: mỗi mode có 2 matches, 0 ghost, 1 miss; sum_sq_err LiDAR = 0.04450990452758851 m², fused = 0.04779304775963698 m². Frame 0 có 2 detection TP nhưng 0 confirmed track, 2 miss ở cả hai mode: tracker cần tích luỹ score trước khi xác nhận. Frame 198 có 9 GT, 3 detection TP, 6 detection FN; tracking có 3 matches, 0 ghost, 6 miss. Vì vậy phải đọc cả miss và detection, không chỉ RMSE thấp hoặc ghost bằng 0. Tổng 239 tracking miss và 222 detection FN chênh 17; đây là chênh lệch tổng số đếm, không phải phân rã nguyên nhân theo từng xe.
+
+Nhiễu pixel và việc tâm hộp 2D không nhất thiết trùng phép chiếu tâm hộp 3D có thể làm camera update không cải thiện state. Chưa có ablation để xác định mức đóng góp từng yếu tố, vì vậy không khẳng định calibration sai. Camera lab dùng tâm hộp ground-truth FRONT rồi thêm nhiễu seeded, không chạy detector ảnh; kết quả không chứng minh chất lượng camera detector hoặc perception system độc lập với GT.
+
+Đã kiểm tra 199 record mỗi mode, 398 record compare, không thiếu/trùng `(mode, frame)`. Mọi record thoả `matches + ghosts == confirmed` và `matches + misses == valid_gt`. Đã tính lại metrics từ log bằng `validate_metrics_records` cho compare và hai file per-mode; log per-mode khớp chính xác phần tương ứng trong log gộp. `rmse = sqrt(sum_sq_err / matches)` trên vị trí 3D của confirmed tracks ghép một-một với GT trong cổng XY 2 m.
+
+Lệnh tái lập từ gốc repo trên Windows:
 
 ```powershell
 $env:PYTHONUTF8 = '1'
@@ -51,11 +69,7 @@ $env:DAY23_HEADLESS = '1'
 .venv/Scripts/python.exe tools/check_submission.py
 ```
 
-Cần đối chiếu `rmse = sqrt(sum_sq_err / matches)` trên vị trí 3D của confirmed tracks ghép một-một với GT trong cổng XY 2 m; RMSE null nếu không có cặp. Đọc RMSE cùng matches, ghost và miss: ít cặp ghép có thể cho RMSE thấp nhưng bỏ sót nhiều xe. Tính `precision_track = matches / (matches + ghost_track_frames)` và `coverage = matches / det_tp`. Mục tiêu đủ điểm là RMSE mỗi mode ≤ 0.45 m, precision_track ≥ 0.75, coverage ≥ 0.70 và `rmse_fused - rmse_lidar ≤ 0.05 m`.
-
-Mỗi `(mode, frame)` phải có đúng một record log, với `matches + ghosts == confirmed` và `matches + misses == valid_gt`. Tổng/trung bình log phải khớp metrics; detection phải giống nhau giữa hai mode.
-
-Camera lab lấy tâm hộp 2D ground-truth FRONT rồi thêm nhiễu seeded, không chạy detector ảnh. Kết quả fused không chứng minh chất lượng một camera detector hoặc perception system độc lập với GT.
+Dữ liệu và weights đặt local trong `data/`; `student/config/paths.yaml` trỏ tới segment trên, frame_start 0, frame_end 198. Không commit dữ liệu, weights, config local hoặc ZIP. Giữ nguyên Part A–D, platform và test gốc.
 
 ## Giải thích ngắn (Parts E–H)
 
@@ -107,16 +121,16 @@ Xoá trong lượt LiDAR nếu một điều kiện đúng: Pxx > 9 hoặc Pyy >
 
 - Công cụ đã dùng (ChatGPT, Copilot, Claude, …): OpenAI Codex trong ChatGPT.
 - Dùng cho phần nào (hàm, câu hỏi, debug): Đọc yêu cầu; triển khai tất cả hàm Part E–H; cài môi trường và kiểm tra; chuẩn bị phần giải thích báo cáo, tìm dữ liệu/weights.
-- Cách bạn đã kiểm tra lại (pytest, chạy Waymo, đối chiếu công thức): Codex chạy test gốc trước triển khai (82 passed, 46 xfailed), đối chiếu công thức với stub/hướng dẫn kỹ thuật, chạy test từng checkpoint rồi toàn bộ 128 test sau CP4. Chưa chạy Waymo thành công hoặc đối chiếu metrics/log. Học viên cần tự đọc, kiểm tra và giải thích được code/báo cáo khi vấn đáp.
+- Cách bạn đã kiểm tra lại (pytest, chạy Waymo, đối chiếu công thức): Codex chạy test gốc trước triển khai (82 passed, 46 xfailed), đối chiếu công thức với stub/hướng dẫn kỹ thuật, chạy test từng checkpoint rồi toàn bộ 128 test sau CP4. Đã chạy Waymo compare seed 0 đủ frames 0–198; kiểm tra lại cả 3 cặp metrics/log và đối chiếu ngưỡng rubric. Học viên cần tự đọc, kiểm tra và giải thích được code/báo cáo khi vấn đáp.
 
 ## Checklist nộp
 
 - [x] Part E–H đã implement; toàn bộ 128 test pass, không failed/xfailed.
 - [x] Đã đọc và giữ nguyên Part A–D, platform và tests.
-- [ ] Chạy chấm điểm compare, seed 0, frames 0–198 thành công.
-- [ ] Đã commit đủ 6 artifacts do pipeline sinh, không sửa tay.
-- [ ] Đã điền số liệu thực tế, so sánh hai mode và commit hash nộp cuối.
+- [x] Chạy chấm điểm compare, seed 0, frames 0–198 thành công.
+- [x] Đã commit đủ 6 artifacts do pipeline sinh, không sửa tay.
+- [x] Đã điền số liệu thực tế, so sánh hai mode và hướng dẫn lấy commit hash cuối.
 - [x] Có khai báo AI phản ánh đúng việc đã thực hiện.
 - [x] Không commit Waymo, weights, paths.yaml, ZIP hoặc API key.
-- [ ] check_submission.py báo sẵn sàng nộp.
-- [ ] Đã push và nộp link repo + commit hash trên LMS.
+- [x] check_submission.py xác nhận sẵn sàng nộp sau commit CP6.
+- [ ] Học viên nộp link repo và hash HEAD cuối trên LMS; thao tác này riêng với việc hoàn thiện repo.
