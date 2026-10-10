@@ -4,10 +4,10 @@
 
 ## Thông tin học viên
 
-- Họ tên:
-- MSSV:
-- Email:
-- Link repo (fork):
+- Họ tên: Nguyễn Trọng Phúc
+- MSSV: 2A202602552
+- Email: phucmxst123@gmail.com (theo cấu hình git; cần học viên xác nhận)
+- Link repo (fork): https://github.com/Wrxhard/K4-L2L3-DAY23-NguyenTrongPhuc-2A202602552-SensorFusion
 - Commit hash nộp (`git rev-parse HEAD`):
 
 ## Tóm tắt kết quả
